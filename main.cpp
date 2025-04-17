@@ -19,19 +19,23 @@ int main()
     //random init
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(-1, 1);
+    std::uniform_int_distribution<> distrib(-10, 10);
     std::uniform_int_distribution<> distrib2(1, WIDTH);
     std::uniform_int_distribution<> distrib3(1, HEIGTH);
 
     //Create Window
-    sf::RenderWindow window(sf::VideoMode({WIDTH, HEIGTH}), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode({WIDTH, HEIGTH}), "Physics engine");
     window.setFramerateLimit(Frame_rate);
 
     //Create particles
     std::vector<Particle> particles;
 
-    
-    for (int i = 0; i<1000; i++){
+    sf::CircleShape fondo(BACK_RAD);
+    fondo.setPointCount(500);
+    fondo.setFillColor(sf::Color::Black);
+    fondo.setOrigin(sf::Vector2f(BACK_RAD, BACK_RAD));
+    fondo.setPosition(sf::Vector2f(WIDTH/ 2.f, HEIGTH/ 2.f));
+    for (int i = 0; i<500; i++){
         
         float vel_x = distrib(gen);
         float vel_y = distrib(gen);
@@ -60,21 +64,20 @@ int main()
                 window.close();
         }
         
-        window.clear();
-
-        
-        for (int i = 0; i< particles.size(); i++){
-            particles[i].applyForce({0,0.1f*particles[i].mass});
-            
-            particles[i].EdgeCollisions();
-            for (int j = i+1; j< particles.size();j++){
-                particles[i].ParticleCollision(particles[j]);
+        window.clear(sf::Color(50,50,50));
+        window.draw(fondo);
+        uint32_t sub_steps = 15;
+        for(int k= 0; k<sub_steps;k++){
+            for (int i = 0; i< particles.size(); i++){
                 
                 
+                particles[i].EdgeCollisions();
+                for (int j = i+1; j< particles.size();j++){
+                    particles[i].ParticleCollision(particles[j]);  
+                }
+                particles[i].update(1/ (float )sub_steps);
             }
-            particles[i].update();
         }
-        
 
         for (const auto& particle: particles) {
             sf::CircleShape circle(particle.radius);

@@ -17,18 +17,26 @@ class Particle{
     bool is_pinned;
 
     Particle(int ID,float x, float y, bool pinned = false, double radius = 10, sf::Vector2f velocity = sf::Vector2f(0,500), sf::Color color = getRandomColor() ): position(x,y), velocity(velocity), 
-    acceleration(0,0), is_pinned(pinned) , color(color),radius(radius),mass(radius*radius), ID(ID) {}
+    acceleration(0,GRAVITY), is_pinned(pinned) , color(color),radius(radius),mass(radius*radius), ID(ID) {}
 
     
-    void update(){
-        velocity += acceleration;
+    void update(float dt){
+        velocity += acceleration*dt;
         
-        position += velocity;
-        acceleration *= 0.0f;
+        position += velocity*dt;
+        //acceleration *= 0.0f;
     }
 
     void EdgeCollisions(){
-        if (position.x < radius){ 
+
+        const sf::Vector2f v    = sf::Vector2f(WIDTH/2,HEIGTH/2) - position;
+        const float dist = sqrt(v.x * v.x + v.y * v.y);
+        if (dist > (BACK_RAD - radius)) {
+            const sf::Vector2f n = v / dist;
+            position = sf::Vector2f(WIDTH/2,HEIGTH/2) - n * (BACK_RAD - radius);
+            velocity = -Simmetry(velocity,v) * BOX_RESTITUTION;
+        }
+        /*if (position.x < radius){ 
             velocity.x*=-BOX_RESTITUTION;
             position.x = radius;
         }else if (position.x >(WIDTH-radius)){
@@ -43,7 +51,7 @@ class Particle{
 
             velocity.y*=-BOX_RESTITUTION;
             position.y = (HEIGTH-radius);
-        }
+        }*/
     }
 
     void ParticleCollision(Particle& particle){
@@ -58,9 +66,16 @@ class Particle{
         if (dist < (radius+particle.radius)){
             sf::Vector2f normal = diff / dist;
             //Fix overlap
-            float overlap  = radius + particle.radius - dist;
+            float overlap  = radius + particle.radius - dist + 0.5;
             position += -(normal)*overlap/2.0f;
             particle.position += (normal)*overlap/2.0f;
+
+            sf::Vector2f jitter(
+                ((rand() % 100) - 50) / 10000.f,
+                ((rand() % 100) - 50) / 10000.f
+            );
+            position += jitter;
+            particle.position -= jitter;
 
             float dist = radius + particle.radius;
             diff = particle.position - position;
@@ -90,6 +105,12 @@ class Particle{
     }
     static sf::Color getRandomColor() {
         return sf::Color(rand() % 256, rand() % 256, rand() % 256);
+    }
+
+    sf::Vector2f Simmetry(sf::Vector2f vec1, sf::Vector2f dir){
+        float mod_dir = std::hypot(dir.x,dir.y);
+        sf::Vector2f proy = dir * (dot(vec1,dir)/(mod_dir*mod_dir));
+        return (2.0f*proy - vec1);
     }
 };
 
