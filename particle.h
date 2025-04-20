@@ -59,7 +59,7 @@ class Particle{
         float dist = std::hypot(diff.x,diff.y);
 
         if (dist == 0.0f) {
-            float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * 3.14159265f;
+            float angle = 0;
             diff = sf::Vector2f(std::cos(angle), std::sin(angle)) * 0.01f; 
             dist = std::hypot(diff.x, diff.y);
         }
@@ -70,12 +70,7 @@ class Particle{
             position += -(normal)*overlap/2.0f;
             particle.position += (normal)*overlap/2.0f;
 
-            sf::Vector2f jitter(
-                ((rand() % 100) - 50) / 10000.f,
-                ((rand() % 100) - 50) / 10000.f
-            );
-            position += jitter;
-            particle.position -= jitter;
+            
 
             float dist = radius + particle.radius;
             diff = particle.position - position;
