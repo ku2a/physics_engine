@@ -1,4 +1,4 @@
-````markdown
+
 # Simple Physics Engine in C++
 
 ## Usage
@@ -21,6 +21,5 @@ Ejecuta el programa:
 ./programa
 ```
 
-```
-```
+
 
